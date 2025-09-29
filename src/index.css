@@ -8,33 +8,41 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* CS - Click Seguro Warm Color Palette */
+    --background: 15 100% 96%; /* Warm white (#FFECE0) */
+    --foreground: 22 48% 32%; /* Dark brown (#7A4B2A) */
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 22 48% 32%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 22 48% 32%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Coral primary color (#FF7A59) */
+    --primary: 12 100% 67%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Peach secondary (#FFB067) */
+    --secondary: 31 100% 70%;
+    --secondary-foreground: 22 48% 32%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Light cream backgrounds (#FFD9B3) */
+    --muted: 32 100% 84%;
+    --muted-foreground: 22 48% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 31 100% 70%;
+    --accent-foreground: 22 48% 32%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Warning/Alert colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --warning: 45 93% 47%;
+    --warning-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 32 50% 90%;
+    --input: 32 50% 88%;
+    --ring: 12 100% 67%;
 
     --radius: 0.5rem;
 
@@ -52,7 +60,12 @@ All colors MUST be HSL.
 
     --sidebar-border: 220 13% 91%;
 
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Additional animations for the app */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Gradients for enhanced visual appeal */
+    --gradient-warm: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
   }
 
   .dark {
