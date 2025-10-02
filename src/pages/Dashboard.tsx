@@ -8,6 +8,7 @@ import { Shield, AlertTriangle, BookOpen, History, Settings, MessageCircle } fro
 import { useToast } from "@/hooks/use-toast";
 import { AlertNotification } from "@/components/AlertNotification";
 import { DemoControls } from "@/components/DemoControls";
+import { LinkAnalyzer } from "@/components/LinkAnalyzer";
 
 interface Alert {
   id: string;
@@ -160,6 +161,9 @@ const Dashboard = () => {
             <span>Aprender</span>
           </Button>
         </div>
+
+        {/* Link Analyzer */}
+        <LinkAnalyzer />
 
         {/* Demo Controls for Science Fair */}
         <DemoControls onTriggerAlert={handleNewAlert} />
