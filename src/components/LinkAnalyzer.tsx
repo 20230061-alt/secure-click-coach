@@ -12,12 +12,12 @@ interface AnalysisResult {
 }
 
 export const LinkAnalyzer = () => {
-  const [url, setUrl] = useState("");
+  const [message, setMessage] = useState("");
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const analyzeUrl = () => {
-    if (!url.trim()) return;
+  const analyzeMessage = () => {
+    if (!message.trim()) return;
 
     setIsAnalyzing(true);
     
@@ -26,46 +26,84 @@ export const LinkAnalyzer = () => {
       const reasons: string[] = [];
       let risk = 0;
 
-      // Detectar URL acortadas
-      if (/(bit\.ly|tinyurl|short|t\.co|goo\.gl)/i.test(url)) {
-        reasons.push("URL acortada detectada");
+      const text = message.toLowerCase();
+
+      // Detectar lenguaje de urgencia
+      if (/(urgente|ahora|inmediato|último día|última oportunidad|caduca|expira hoy|actúa ya)/i.test(message)) {
+        reasons.push("Lenguaje de urgencia detectado");
+        risk += 20;
+      }
+
+      // Detectar solicitud de datos personales
+      if (/(contraseña|password|tarjeta|cuenta bancaria|número de cuenta|pin|cvv|datos personales|verificar identidad)/i.test(message)) {
+        reasons.push("Solicita información personal o bancaria");
+        risk += 30;
+      }
+
+      // Detectar ofertas demasiado buenas
+      if (/(ganaste|premio|lotería|heredaste|millones|gratis|sin costo|100% gratis|oferta exclusiva)/i.test(message)) {
+        reasons.push("Oferta sospechosa o premio no solicitado");
+        risk += 25;
+      }
+
+      // Detectar amenazas
+      if (/(bloquear|suspender|cuenta bloqueada|suspendida|eliminar cuenta|cerrar cuenta|consecuencias)/i.test(message)) {
+        reasons.push("Contiene amenazas o intimidación");
+        risk += 25;
+      }
+
+      // Detectar URL acortadas en el mensaje
+      if (/(bit\.ly|tinyurl|short|t\.co|goo\.gl)/i.test(message)) {
+        reasons.push("URL acortada detectada en el mensaje");
         risk += 25;
       }
 
       // Detectar dominios sospechosos
-      if (/\.(tk|ml|ga|cf|gq)/.test(url)) {
+      if (/\.(tk|ml|ga|cf|gq)/.test(message)) {
         reasons.push("Dominio gratuito sospechoso");
         risk += 30;
       }
 
-      // Detectar HTTPS faltante
-      if (!/^https:/.test(url)) {
-        reasons.push("Sin conexión segura (HTTPS)");
+      // Detectar URLs sin HTTPS
+      const httpUrls = message.match(/http:\/\/[^\s]+/g);
+      if (httpUrls && httpUrls.length > 0) {
+        reasons.push("Enlace sin conexión segura (HTTP)");
         risk += 15;
       }
 
-      // Detectar direcciones IP
-      if (/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(url)) {
+      // Detectar direcciones IP en URLs
+      if (/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(message)) {
         reasons.push("Usa dirección IP en lugar de dominio");
         risk += 20;
       }
 
-      // Detectar muchos subdominios
-      const domainParts = url.split('/')[2]?.split('.');
-      if (domainParts && domainParts.length > 3) {
-        reasons.push("Múltiples subdominios sospechosos");
-        risk += 15;
+      // Detectar errores ortográficos comunes en nombres de empresas
+      if (/(paypa1|arnazon|netfIix|micros0ft|g00gle|facebok|whatsap)/i.test(message)) {
+        reasons.push("Posible suplantación de marca conocida");
+        risk += 35;
       }
 
-      // Detectar caracteres extraños
-      if (/[@%]/.test(url)) {
-        reasons.push("Caracteres sospechosos en la URL");
+      // Detectar muchos subdominios en URLs
+      const urlMatches = message.match(/https?:\/\/([^\/\s]+)/g);
+      if (urlMatches) {
+        urlMatches.forEach(url => {
+          const domainParts = url.split('/')[2]?.split('.');
+          if (domainParts && domainParts.length > 3) {
+            reasons.push("Múltiples subdominios sospechosos");
+            risk += 15;
+          }
+        });
+      }
+
+      // Detectar caracteres extraños en URLs
+      if (/[@%]/.test(message) && /https?:/.test(message)) {
+        reasons.push("Caracteres sospechosos en URLs");
         risk += 20;
       }
 
       if (reasons.length === 0) {
-        reasons.push("La URL parece segura");
-        reasons.push("Siempre verifica el contenido al abrir enlaces");
+        reasons.push("El mensaje parece seguro");
+        reasons.push("Siempre verifica el remitente antes de responder");
       }
 
       setResult({
@@ -94,28 +132,28 @@ export const LinkAnalyzer = () => {
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center space-x-2">
           <Link2 className="w-5 h-5" />
-          <span>Analizar Enlace</span>
+          <span>Analizar Mensaje</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Ingresa un enlace para verificar si es seguro:
+          Pega un mensaje o enlace completo para verificar si es seguro:
         </p>
         
-        <div className="flex space-x-2">
-          <Input
-            type="url"
-            placeholder="https://ejemplo.com"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && analyzeUrl()}
+        <div className="space-y-2">
+          <textarea
+            className="w-full min-h-[100px] px-3 py-2 text-sm rounded-md border border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            placeholder="Ejemplo: ¡URGENTE! Tu cuenta será suspendida. Haz click aquí: https://ejemplo-sospechoso.com"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
           />
           <Button
-            onClick={analyzeUrl}
-            disabled={!url.trim() || isAnalyzing}
-            size="icon"
+            onClick={analyzeMessage}
+            disabled={!message.trim() || isAnalyzing}
+            className="w-full"
           >
-            <Search className="w-4 h-4" />
+            <Search className="w-4 h-4 mr-2" />
+            Analizar Mensaje
           </Button>
         </div>
 
