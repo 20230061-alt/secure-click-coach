@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,19 +7,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Bell, Shield, Trash2, Globe, Type, Info, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { storage } from "@/utils/storage";
 
 const Settings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const [settings, setSettings] = useState({
-    protection: true,
-    notifications: true,
-    highRiskOnly: false,
-    language: "es",
-    fontSize: "medium",
-    analytics: true
+  const [settings, setSettings] = useState(() => {
+    const saved = storage.getSettings();
+    return saved || {
+      protection: true,
+      notifications: true,
+      highRiskOnly: false,
+      language: "es",
+      fontSize: "medium",
+      analytics: true
+    };
   });
+
+  useEffect(() => {
+    storage.saveSettings(settings);
+  }, [settings]);
 
   const updateSetting = (key: string, value: boolean | string) => {
     setSettings(prev => ({ ...prev, [key]: value }));
@@ -30,6 +38,15 @@ const Settings = () => {
   };
 
   const clearAllData = () => {
+    storage.clearAll();
+    setSettings({
+      protection: true,
+      notifications: true,
+      highRiskOnly: false,
+      language: "es",
+      fontSize: "medium",
+      analytics: true
+    });
     toast({
       title: "Datos eliminados",
       description: "Todo el historial y configuración ha sido borrado.",

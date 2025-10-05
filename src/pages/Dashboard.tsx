@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AlertNotification } from "@/components/AlertNotification";
 import { DemoControls } from "@/components/DemoControls";
 import { LinkAnalyzer } from "@/components/LinkAnalyzer";
+import { storage } from "@/utils/storage";
 
 interface Alert {
   id: string;
@@ -22,11 +23,32 @@ interface Alert {
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isProtectionActive, setIsProtectionActive] = useState(true);
-  const [todayAlerts, setTodayAlerts] = useState(0);
-  const [totalAlerts, setTotalAlerts] = useState(5);
+  const [isProtectionActive, setIsProtectionActive] = useState(() => {
+    const saved = storage.getDashboardState();
+    return saved?.isProtectionActive ?? true;
+  });
+  const [todayAlerts, setTodayAlerts] = useState(() => {
+    const saved = storage.getDashboardState();
+    return saved?.todayAlerts ?? 0;
+  });
+  const [totalAlerts, setTotalAlerts] = useState(() => {
+    const saved = storage.getDashboardState();
+    return saved?.totalAlerts ?? 5;
+  });
   const [currentAlert, setCurrentAlert] = useState<Alert | null>(null);
-  const [recentAlerts, setRecentAlerts] = useState<Alert[]>([]);
+  const [recentAlerts, setRecentAlerts] = useState<Alert[]>(() => {
+    const saved = storage.getDashboardState();
+    return saved?.recentAlerts ?? [];
+  });
+
+  useEffect(() => {
+    storage.saveDashboardState({
+      isProtectionActive,
+      todayAlerts,
+      totalAlerts,
+      recentAlerts
+    });
+  }, [isProtectionActive, todayAlerts, totalAlerts, recentAlerts]);
 
   const handleNewAlert = (alert: Alert) => {
     setCurrentAlert(alert);

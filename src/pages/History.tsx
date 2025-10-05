@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, MessageCircle, Filter, Calendar, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { storage } from "@/utils/storage";
 
 interface Alert {
   id: string;
@@ -62,9 +63,16 @@ const mockAlerts: Alert[] = [
 const History = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [alerts, setAlerts] = useState(mockAlerts);
+  const [alerts, setAlerts] = useState(() => {
+    const saved = storage.getAlerts();
+    return saved.length > 0 ? saved : mockAlerts;
+  });
   const [filterApp, setFilterApp] = useState<string>("all");
   const [filterRisk, setFilterRisk] = useState<string>("all");
+
+  useEffect(() => {
+    storage.saveAlerts(alerts);
+  }, [alerts]);
 
   const filteredAlerts = alerts.filter(alert => {
     const appMatch = filterApp === "all" || alert.app === filterApp;
